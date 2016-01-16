@@ -2,13 +2,7 @@
 
 # make sure to run `ssh-keygen -t rsa` to create a ssh private key for this device
 # and then run `ssh-copy-id pi@192.168.0.1` for each of your IPs
-# TODO: move to ~/.pilist
-pilist="\
-pi@172.16.0.11 \
-pi@172.16.0.12 \
-pi@172.16.0.13 \
-pi@172.16.0.14 \
-"
+pilist=`cat ~/.pilist`
 
 cmd=$@
 
