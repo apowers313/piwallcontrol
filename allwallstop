@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# kill old streaming servers
+ps -x | grep allwallstart
+oldplayers=`ps -x | grep allwallstart | cut -b1-6 | grep -v $$ | grep -v $PPID | xargs`
+echo Oldwall pids: $oldplayers
+if [ "$oldplayers" != "" ]; then
+  kill -9 $oldplayers
+fi
+# WARNING: hope you weren't transcoding...
+killall -9 avconv
+
+allwallcmd 'killall pwomxplayer.bin'

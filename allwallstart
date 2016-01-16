@@ -1,0 +1,114 @@
+#!/bin/bash
+
+default_path=/home/pi/media/default
+PATH=$PATH:/home/pi/bin
+
+# parse arguments
+boot=0
+if [ "$1" == "-b" ]; then
+  boot=1
+  shift 1
+  echo Waiting for boot to complete ...
+  sleep 30
+fi
+
+random=0
+if [ "$1" == "-r" ]; then
+  random=1
+  shift 1
+fi
+
+path=$1
+if [ "$#" -lt 1 ]; then
+  if [ -e $default_path ]; then
+    echo No media path specified, using default folder: $default_path
+    path=$default_path
+  else
+    echo No media path specified, and no default available. Exiting.
+    exit 0
+  fi
+fi
+
+file=0
+directory=0
+if [ -f "$path" ]; then
+  file=1
+elif [ -d "$path" ]; then
+  directory=1
+else
+  echo Argument \"$path\" isn\'t a file or directory
+  exit 0
+fi
+
+if [ "$path" != "$default_path" -a -e $default_path -a -h $default_path ]; then
+  rm $default_path
+fi
+
+if [ ! -e $default_path ]; then
+  ln -s "$path" $default_path
+fi
+
+# ignore sighup (run as a daemon)
+trap ignore SIGHUP
+function ignore() {
+  echo AllWallStart ignoring SIGHUP
+}
+
+# kill old tiles
+allwallstop
+
+# turn off sound
+#allwallmute
+
+# copy most recent piwall config file
+allwallcmd -c ~/.piwall .
+
+# make sure TVs are on
+allwallon
+
+# start new tiles
+allwallplay
+
+# make sure players are good and ready
+for (( i=15 ; $i > 0; i-- )); do 
+  echo Waiting for player stabilization: $i ...
+  sleep 1
+done
+
+if [ $file -eq 1 ]; then
+  while [ 1 ]; do
+    nohup avconv -re -i "$path" -vcodec copy -f avi -an udp://239.0.1.23:1234
+  done
+fi
+
+if [ $directory -eq 1 ]; then
+  files=($path/*)
+  echo Found ${#files[*]} files to play.
+  filecount=${#files[*]}
+
+  for (( i=0 ; i<$filecount; i++)); do
+    echo File $i: ${files[$i]}
+  done
+
+  prev=-1
+  curr=-1
+  max=$((filecount-1))
+  while [ 1 ]; do
+
+    if [ $random -eq 1 ]; then
+      curr=`shuf -i 0-$max -n 1`
+    else
+      curr=$(( (curr+1) % filecount ))
+    fi
+
+    if [ $prev -eq $curr ]; then
+      # echo Skipping duplicate...
+      continue
+    fi
+
+    echo Playing \#$curr: ${files[$curr]}
+    nohup avconv -re -i "${files[$curr]}" -vcodec copy -f avi -an udp://239.0.1.23:1234
+
+    prev=$curr
+  done
+fi

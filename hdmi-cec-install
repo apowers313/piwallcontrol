@@ -1,0 +1,23 @@
+#!/bin/bash
+
+sudo apt-get update
+sudo apt-get install cmake liblockdev1-dev libudev-dev libxrandr-dev python-dev swig
+mkdir ~/install
+mkdir ~/install/hdmi-cec
+cd ~/install/hdmi-cec
+git clone https://github.com/Pulse-Eight/platform.git
+mkdir platform/build
+cd platform/build
+cmake ..
+make
+sudo make install
+cd ~/install/hdmi-cec
+git clone https://github.com/Pulse-Eight/libcec.git
+mkdir libcec/build
+cd libcec/build
+# until libcec PR #168 is merged: https://github.com/Pulse-Eight/libcec/pull/168
+sed -i.bak 's/HAVE_RPI_API 0/HAVE_RPI_API 1/' src/libcec/cmake/CheckPlatformSupport.cmake
+cmake -DRPI_INCLUDE_DIR=/opt/vc/include -DRPI_LIB_DIR=/opt/vc/lib -DHAVE_RPI_API=1 ..
+make -j4
+sudo make install
+sudo ldconfig

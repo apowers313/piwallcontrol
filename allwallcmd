@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# make sure to run `ssh-keygen -t rsa` to create a ssh private key for this device
+# and then run `ssh-copy-id pi@192.168.0.1` for each of your IPs
+# TODO: move to ~/.pilist
+pilist="\
+pi@172.16.0.11 \
+pi@172.16.0.12 \
+pi@172.16.0.13 \
+pi@172.16.0.14 \
+"
+
+cmd=$@
+
+function runcmd {
+  echo Command: $1
+  for pi in $pilist; do
+    runcmd="ssh $pi $@"
+    echo :::: Running $runcmd
+    $runcmd
+  done
+}
+
+# lame that there have to be two functions, but I couldn't figure out how to get & to do the right thing otherwise...
+function runcmdbg {
+  echo Command: $1
+  for pi in $pilist; do
+    runcmd="ssh $pi $@"
+    echo :::: Backgrounding $runcmd
+    $runcmd &
+  done
+}
+
+# run in background
+if [ "$1" == "-b" -a "$2" == "--" ]; then
+  echo Backgrounding commands...
+  shift 2
+  cmd=$@
+  runcmdbg "$cmd"
+  exit 0
+fi
+
+# copy file
+if [ "$1" == "-c" ]; then
+  echo Copying files...
+  shift 1
+  # currently only handles one file... could handle more using a while loop and "shift"
+  for pi in $pilist; do
+    cmd="scp $1 $pi:$2"
+    echo Running \"$cmd\" ...
+    $cmd
+  done
+  exit 0
+fi
+
+# default
+runcmd $cmd
+
