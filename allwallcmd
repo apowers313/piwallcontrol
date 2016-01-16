@@ -47,6 +47,19 @@ if [ "$1" == "-c" ]; then
   exit 0
 fi
 
+# install ssh keys
+if [ "$1" == "-k" ]; then
+  echo Install ssh keys...
+  shift 1
+  # currently only handles one file... could handle more using a while loop and "shift"
+  for pi in $pilist; do
+    cmd="ssh-copy-id $pi"
+    echo Installing ssh key on \"$pi\" ...
+    $cmd
+  done
+  exit 0
+fi
+
 # default
 runcmd $cmd
 
