@@ -1,5 +1,5 @@
 ## PiWallControl
-Scripts for controlling a [PiWall](http://www.piwall.co.uk/)
+Scripts for controlling a [PiWall](http://www.piwall.co.uk/). Check out the [wiki](https://github.com/apowers313/piwallcontrol/wiki) for this project for more information on this project.
 
 ## Installation
 ### 1. git scripts
@@ -46,19 +46,21 @@ To install HDMI CEC on all the tiles run these two commands:
 
 ### 5. rc.local (optional)
 Add the following lines to the bottom of `/etc/rc.local` to start the PiWall at boot:
-- `sudo -u pi /home/pi/bin/allwallstart -b -r &` : start the PiWall with the default playlist (whichever one was last). The `-b` argument is for boot, which causes `allwallstart` to wait an extra 30 seconds before doing its thing, so that all the tiles have a chance to finish booting.
+- `sudo -u pi /home/pi/bin/allwallstart -b -r &` : start the PiWall with the default playlist (whichever one was last). The `-b` argument is for boot, which causes `allwallstart` to wait an extra 30 seconds before doing its thing, so that all the tiles have a chance to finish booting. Note: if you do this and your power goes out at 3am and then comes back on, you PiWall will turn back on at 3am. Just warning you.
 - `sudo -u pi node /home/pi/bin/wallremote.js &` : start the PiWall remote control webserver, described below.
 
 ### 6. crontab (optional)
 Add `allwallon` and `allwalloff` to your [crontab](http://crontab.org/) to have your TVs turn on and off at specific times of day.
 
 ### 7. Install Workflow and VideoWall Remote (optional)
+Make sure that wallremote.js is running: `node ~/bin/wallremote.js`. You can verify that it is working right by going to `http://<your host>:8080/list`, which should list all your media files. 
+
 Download and install [Workflow](https://workflow.is/) on your iOS device.
 
 The `VideoWall Remote` workflow can be found [here](https://workflow.is/workflows/a604131dd20f4a259825cd9e026d7881) or by searching for `VideoWall Remote` in the workflow app.
 
 # Using the Scripts
-- allwallstart - stop all previously running scripts, turn on all TVs, start player on all tiles, start streaming specified video
+- allwallstart - stop all previously running scripts, copy the local ~/.piwall to each tile, turn on all TVs, start player on all tiles, start streaming specified video
 - allwallstop - stop all previously running scripts
 - allwallon - use HDMI CEC to turn on all TVs
 - allwalloff - use HDMI CEC to turn off all TVs
