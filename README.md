@@ -1,6 +1,10 @@
 ## PiWallControl
 Scripts for controlling a [PiWall](http://www.piwall.co.uk/). Check out the [wiki](https://github.com/apowers313/piwallcontrol/wiki) for this project for more information on this project.
 
+Watch the demo videos:
+* [Demo Video #1](https://www.youtube.com/watch?v=wsvAhC8rldA)
+* [Demo Video #2](https://www.youtube.com/watch?v=E2cMua_qhSY)
+
 ## Installation
 ### 1. git scripts
 Do the following:
