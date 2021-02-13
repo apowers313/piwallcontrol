@@ -45,6 +45,7 @@ if [ "$path" != "$default_path" -a -e $default_path -a -h $default_path ]; then
 fi
 
 if [ ! -e $default_path ]; then
+  rm "" $default_path
   ln -s "$path" $default_path
 fi
 
