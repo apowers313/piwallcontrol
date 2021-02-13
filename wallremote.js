@@ -20,6 +20,11 @@ function handleRequest(request, response) {
   console.log ("Request path:", requestUrl.pathname);
 
   switch (requestUrl.pathname) {
+    case "/":
+    case "/index.html":
+    case "/index.htm":
+      doIndex (response);
+      break;
     case "/list":
       doList (response);
       break;
@@ -31,18 +36,58 @@ function handleRequest(request, response) {
   }
 }
 
-function doList (response) {
+function mkList() {
   var files = fs.readdirSync (PATH);
-  var fileStr = "";
+  return files
+    .filter(function (f) { return IGNORE_LIST.indexOf(f) === -1; })
+    .filter(function (f) { return f[0] !== "."; });
+}
+
+function fileLink(file) {
+  // console.log("FILE:", file);
+  // var fileLink =
+  //   "<a href=/play?play=" + file + ">" +
+  //  file +
+  //  "</a>" +
+  //  "<br>\n";
+  // console.log("FILE LINK:", fileLink);
+  var fileLink =
+    '<form action="/play">\n' +
+    '  <input type="hidden" name="play" value="' + file + '">\n' +
+    '  <input type="submit" value="' + file + '">\n' +
+    '</form>\n\n';
+
+  return fileLink;
+}
+
+function doIndex (response) {
+  var fileList = mkList();
+
+  var indexStr = "";
+  indexStr += "<title>VideoWall</title>";
+  indexStr += "<meta content='width=device-width, initial-scale=1' name='viewport'/>";
+  indexStr += "<h1>VideoWall</h1>";
+  indexStr += "<br>";
+
   var i;
-  for (i = 0; i < files.length; i++) {
-    if (files[i][0] == ".") continue;
-    if (IGNORE_LIST.indexOf(files[i]) !== -1) continue;
-    fileStr = fileStr + files[i];
-    if (i != (files.length - 1)) fileStr += "\n";
+  for (i = 0; i < fileList.length; i++) {
+    indexStr += fileLink(fileList[i]);
   }
 
-  response.end (fileStr);
+  response.writeHead(200, {
+    'Content-Length': indexStr.length,
+    'Content-Type': 'text/html' });
+  response.end (indexStr, "utf8");
+}
+
+function doList (response) {
+  var fileStr = mkList().join("\n");
+  fileStr += "\n";
+
+  response.writeHead(200, {
+    'Content-Length': fileStr.length,
+    'Content-Type': 'text/plain' });
+  response.end (fileStr, "utf8");
 }
 
 function doPlay (response, requestUrl) {
